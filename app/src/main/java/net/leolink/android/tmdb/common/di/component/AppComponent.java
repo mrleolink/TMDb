@@ -2,7 +2,7 @@ package net.leolink.android.tmdb.common.di.component;
 
 import android.app.Application;
 
-import net.leolink.android.tmdb.TmdbApp;
+import net.leolink.android.tmdb.common.TmdbApp;
 import net.leolink.android.tmdb.common.di.module.ActivityBindingModule;
 import net.leolink.android.tmdb.common.di.module.AppModule;
 import net.leolink.android.tmdb.common.di.scope.AppScoped;

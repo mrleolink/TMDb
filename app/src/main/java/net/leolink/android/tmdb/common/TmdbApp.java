@@ -1,4 +1,4 @@
-package net.leolink.android.tmdb;
+package net.leolink.android.tmdb.common;
 
 import net.leolink.android.tmdb.common.config.NetworkConfig;
 import net.leolink.android.tmdb.common.di.component.DaggerAppComponent;

@@ -38,7 +38,7 @@ public class MovieListViewModel extends ViewModel {
     /** Default none value of year **/
     private static final int YEAR_NONE = Integer.MIN_VALUE;
 
-    // databinding fields
+    // data binding fields
     public final ObservableBoolean empty = new ObservableBoolean();
     public final ObservableField<String> year = new ObservableField<>();
     public final ObservableField<String> message = new ObservableField<>();
@@ -140,7 +140,7 @@ public class MovieListViewModel extends ViewModel {
         mMovieListLiveData.setValue(mMovieList);
         // check empty
         empty.set(mMovieList.isEmpty());
-        message.set("EMPTY!");
+        message.set(mResources.getString(R.string.empty));
     }
 
     private void onError(Throwable throwable) throws IOException {

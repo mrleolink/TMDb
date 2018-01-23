@@ -13,7 +13,9 @@ import android.view.ViewGroup;
 
 import net.leolink.android.tmdb.common.base.BaseFragment;
 import net.leolink.android.tmdb.common.dialog.NumberPickerDialog;
+import net.leolink.android.tmdb.common.io.network.api.model.DiscoverMovie;
 import net.leolink.android.tmdb.databinding.FragmentMovieListBinding;
+import net.leolink.android.tmdb.moviedetail.MovieDetailActivity;
 import net.leolink.android.tmdb.movielist.viewmodel.MovieListViewModel;
 import net.leolink.android.tmdb.movielist.viewmodel.MovieListViewModelFactory;
 
@@ -50,7 +52,7 @@ public class MovieListFragment extends BaseFragment {
         // recycler view
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mDataBinding.recyclerView.setLayoutManager(layoutManager);
-        mAdapter = new MovieListAdapter(mViewModel);
+        mAdapter = new MovieListAdapter(mViewModel, this::openMovieDetail);
         mDataBinding.recyclerView.setAdapter(mAdapter);
         mViewModel.getMovieListLiveData().observe(this, mAdapter::setData);
         // filter button
@@ -70,5 +72,9 @@ public class MovieListFragment extends BaseFragment {
                     .build()
                     .show();
         }
+    }
+
+    private void openMovieDetail(DiscoverMovie movie) {
+        startActivity(MovieDetailActivity.newIntent(mContext, movie));
     }
 }

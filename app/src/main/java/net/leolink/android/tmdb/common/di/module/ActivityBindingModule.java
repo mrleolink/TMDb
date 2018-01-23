@@ -1,6 +1,7 @@
 package net.leolink.android.tmdb.common.di.module;
 
 import net.leolink.android.tmdb.common.di.scope.ActivityScoped;
+import net.leolink.android.tmdb.moviedetail.MovieDetailActivity;
 import net.leolink.android.tmdb.movielist.MovieListActivity;
 import net.leolink.android.tmdb.movielist.MovieListActivityModule;
 
@@ -15,4 +16,7 @@ public abstract class ActivityBindingModule {
     @ActivityScoped
     @ContributesAndroidInjector(modules = MovieListActivityModule.class)
     abstract MovieListActivity movieListActivity();
+    @ActivityScoped
+    @ContributesAndroidInjector
+    abstract MovieDetailActivity movieDetailActivity();
 }
