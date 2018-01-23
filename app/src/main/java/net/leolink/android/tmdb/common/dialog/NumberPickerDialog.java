@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.widget.NumberPicker;
 
 /**
+ * TODO: wrap this dialog with {@link android.support.v4.app.DialogFragment} to retain state after screen rotation
  * @author Leo
  */
 public class NumberPickerDialog extends AlertDialog implements DialogInterface.OnClickListener {

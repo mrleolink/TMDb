@@ -10,7 +10,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import net.leolink.android.tmdb.R;
 import net.leolink.android.tmdb.common.base.BaseFragment;
 import net.leolink.android.tmdb.common.dialog.NumberPickerDialog;
 import net.leolink.android.tmdb.common.io.network.api.model.DiscoverMovie;
@@ -54,7 +56,14 @@ public class MovieListFragment extends BaseFragment {
         mDataBinding.recyclerView.setLayoutManager(layoutManager);
         mAdapter = new MovieListAdapter(mViewModel, this::openMovieDetail);
         mDataBinding.recyclerView.setAdapter(mAdapter);
+        // observe view model
         mViewModel.getMovieListLiveData().observe(this, mAdapter::setData);
+        mViewModel.getShowToastNextPageLiveData().observe(this, showToast -> {
+            if (showToast) {
+                Toast.makeText(getContext(), R.string.loading_next_page, Toast.LENGTH_SHORT).show();
+                mViewModel.getShowToastNextPageLiveData().setValue(false);
+            }
+        });
         // filter button
         mDataBinding.filter.setOnClickListener(view -> filterByYear());
         // clear filter

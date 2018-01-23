@@ -8,10 +8,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
 import net.leolink.android.tmdb.R;
+import net.leolink.android.tmdb.common.Utils;
 import net.leolink.android.tmdb.common.io.network.api.model.DiscoverMovie;
 import net.leolink.android.tmdb.common.io.network.api.model.DiscoverResponse;
 import net.leolink.android.tmdb.movielist.service.MovieListService;
@@ -49,9 +51,11 @@ public class MovieListViewModel extends ViewModel {
     private Resources mResources;
     private MovieListService mMovieListService;
 
+    private final MutableLiveData<Boolean> mShowToastNextPageLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<DiscoverMovie>> mMovieListLiveData = new MutableLiveData<>();
     private final List<DiscoverMovie> mMovieList = new ArrayList<>();
 
+    private boolean mIsLoading = false;
     private int mYearFilterInt = YEAR_NONE;
     private int mCurrentPage = 0;
     private boolean mAllLoaded = false;
@@ -72,6 +76,11 @@ public class MovieListViewModel extends ViewModel {
         return mMovieListLiveData;
     }
 
+    @NonNull
+    public MutableLiveData<Boolean> getShowToastNextPageLiveData() {
+        return mShowToastNextPageLiveData;
+    }
+
     public int getLastPageItemCount() {
         return mLastPageItemCount;
     }
@@ -84,14 +93,19 @@ public class MovieListViewModel extends ViewModel {
     }
 
     /** Load next page with current settings **/
+    @MainThread
     public void nextPage() {
-        if (mAllLoaded) return;
+        if (mIsLoading || mAllLoaded) return;
+        mIsLoading = true;
         load(false);
         // loading indicator
-        Toast.makeText(mContext, R.string.loading_next_page, Toast.LENGTH_SHORT).show();
+        mShowToastNextPageLiveData.setValue(true);
+        // log
+        Utils.loge("About to load: " + (mCurrentPage + 1));
     }
 
     /** Filter movies by release year **/
+    @MainThread
     public void setYear(int year) {
         if (year == mYearFilterInt) return;
         this.mYearFilterInt = year;
@@ -105,14 +119,19 @@ public class MovieListViewModel extends ViewModel {
     }
 
     /** Clear year filter **/
+    @MainThread
     public void clearYearFilter() {
         setYear(YEAR_NONE);
     }
 
+    @MainThread
     private void load(boolean reset) {
+        // mark as loading
+        mIsLoading = true;
         // reset data if necessary
         if (reset) {
             resetData();
+            mMovieListLiveData.setValue(mMovieList); // trigger notifyDataSetChange() for empty list to avoid RV's crash
             empty.set(true);
             message.set(mResources.getString(R.string.loading));
         }
@@ -129,7 +148,10 @@ public class MovieListViewModel extends ViewModel {
         return mMovieListService.getMovieListByYear(mCurrentPage, mYearFilterInt);
     }
 
+    @MainThread
     private void onSuccess(DiscoverResponse discoverResponse) {
+        // mark as done
+        mIsLoading = false;
         // mark all loaded
         if (mCurrentPage >= MAX_PAGE || discoverResponse.getPage() == discoverResponse.getTotalPages()) {
             mAllLoaded = true;
@@ -143,7 +165,11 @@ public class MovieListViewModel extends ViewModel {
         message.set(mResources.getString(R.string.empty));
     }
 
+    @MainThread
     private void onError(Throwable throwable) throws IOException {
+        // mark as done
+        mIsLoading = false;
+        // show error
         String errorBody = throwable.getMessage();
         if (throwable instanceof HttpException) {
             ResponseBody rb = ((HttpException) throwable).response().errorBody();
@@ -160,6 +186,7 @@ public class MovieListViewModel extends ViewModel {
     }
 
     private void resetData() {
+        mIsLoading = false;
         mAllLoaded = false;
         mCurrentPage = 0;
         mMovieList.clear();

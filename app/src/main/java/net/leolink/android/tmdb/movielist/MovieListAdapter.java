@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+
 import net.leolink.android.tmdb.R;
 import net.leolink.android.tmdb.common.config.NetworkConfig;
 import net.leolink.android.tmdb.common.io.network.api.model.DiscoverMovie;
@@ -50,11 +52,12 @@ class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.MovieViewHo
         holder.titleView.setText(String.format("%s (%s)", movie.getTitle(), movie.getReleaseDate()));
         // image
         String posterUrl = String.format(NetworkConfig.BASE_IMAGE_URL, movie.getPosterPath());
-        GlideApp.with(holder.itemView)
+        GlideApp.with(holder.itemView) // TODO: use shared config for glide instead
                 .load(posterUrl)
+                .transition(DrawableTransitionOptions.withCrossFade())
                 .centerCrop()
                 .error(R.drawable.ic_launcher_background)
-                .placeholder(R.drawable.ic_launcher_background)
+                .placeholder(R.mipmap.ic_loading)
                 .into(holder.posterView);
         // click listener
         holder.itemView.setOnClickListener(view -> {

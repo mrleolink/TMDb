@@ -12,6 +12,7 @@
         android:id="@+id/poster"
         android:layout_width="@dimen/movie_poster_size"
         android:layout_height="@dimen/movie_poster_size"
+        android:background="@drawable/ic_launcher_background"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:scaleType="centerCrop"
