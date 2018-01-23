@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- All dimensions with a flex attribute has a corresponding "normal screen" value that can be found in the w360dp folder -->
+<resources>
+    <dimen name="spacing_small">4dp</dimen>
+    <dimen name="spacing_medium">8dp</dimen>
+
+    <dimen name="movie_poster_size">64dp</dimen>
+</resources>
