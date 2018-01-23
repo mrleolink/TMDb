@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">TMDb</string>
     <string name="filter_by_year">Filter by year</string>
+    <string name="clear_filter">Clear filter</string>
     <string name="latest">Latest (popularity.desc)</string>
     <string name="loading">Loading...</string>
+    <string name="loading_next_page">Loading next page...</string>
     <string name="error">ERROR!\n%s</string>
 </resources>

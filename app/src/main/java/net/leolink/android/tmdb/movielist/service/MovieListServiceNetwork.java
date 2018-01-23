@@ -29,4 +29,13 @@ public class MovieListServiceNetwork implements MovieListService {
                 // add more custom rx logic here if necessary
                 .subscribeOn(Schedulers.io());
     }
+
+    @Override
+    @NonNull
+    public Observable<DiscoverResponse> getMovieListByYear(int page, int year) {
+        TmdbApi api = mRetrofitBuilder.build().create(TmdbApi.class);
+        return api.listRepos(new DiscoverParams(page, year))
+                // add more custom rx logic here if necessary
+                .subscribeOn(Schedulers.io());
+    }
 }

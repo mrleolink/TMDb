@@ -18,10 +18,12 @@ import net.leolink.android.tmdb.movielist.service.MovieListService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import okhttp3.ResponseBody;
@@ -33,6 +35,8 @@ import retrofit2.HttpException;
 public class MovieListViewModel extends ViewModel {
     /** Max page that TMDB API allows **/
     private static final int MAX_PAGE = 1000;
+    /** Default none value of year **/
+    private static final int YEAR_NONE = Integer.MIN_VALUE;
 
     // databinding fields
     public final ObservableBoolean empty = new ObservableBoolean();
@@ -48,9 +52,10 @@ public class MovieListViewModel extends ViewModel {
     private final MutableLiveData<List<DiscoverMovie>> mMovieListLiveData = new MutableLiveData<>();
     private final List<DiscoverMovie> mMovieList = new ArrayList<>();
 
-    private int mLastPageItemCount = 0;
+    private int mYearFilterInt = YEAR_NONE;
     private int mCurrentPage = 0;
     private boolean mAllLoaded = false;
+    private int mLastPageItemCount = 0;
 
     private Disposable mDisposable;
 
@@ -71,22 +76,57 @@ public class MovieListViewModel extends ViewModel {
         return mLastPageItemCount;
     }
 
+    /** Get current year filter if set, current year on calendar if not **/
+    public int getFilterYear() {
+        int filterYear = mYearFilterInt;
+        if (mYearFilterInt == YEAR_NONE) filterYear = Calendar.getInstance().get(Calendar.YEAR);
+        return filterYear;
+    }
+
+    /** Load next page with current settings **/
     public void nextPage() {
         if (mAllLoaded) return;
         load(false);
         // loading indicator
-        Toast.makeText(mContext, R.string.loading, Toast.LENGTH_SHORT).show();
+        Toast.makeText(mContext, R.string.loading_next_page, Toast.LENGTH_SHORT).show();
+    }
+
+    /** Filter movies by release year **/
+    public void setYear(int year) {
+        if (year == mYearFilterInt) return;
+        this.mYearFilterInt = year;
+        this.year.set(getYearTitle());
+        // load
+        load(true);
+    }
+
+    private String getYearTitle() {
+        return mYearFilterInt == YEAR_NONE ? mResources.getString(R.string.latest) : String.valueOf(mYearFilterInt);
+    }
+
+    /** Clear year filter **/
+    public void clearYearFilter() {
+        setYear(YEAR_NONE);
     }
 
     private void load(boolean reset) {
+        // reset data if necessary
         if (reset) {
             resetData();
             empty.set(true);
             message.set(mResources.getString(R.string.loading));
         }
-        mDisposable = mMovieListService.getMovieList(++mCurrentPage)
+        // get
+        mDisposable = getMovieListObservable()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onSuccess, this::onError);
+    }
+
+    private Observable<DiscoverResponse> getMovieListObservable() {
+        // increase page
+        mCurrentPage += 1;
+        if (mYearFilterInt == YEAR_NONE) return mMovieListService.getMovieList(mCurrentPage);
+        return mMovieListService.getMovieListByYear(mCurrentPage, mYearFilterInt);
     }
 
     private void onSuccess(DiscoverResponse discoverResponse) {
@@ -100,6 +140,7 @@ public class MovieListViewModel extends ViewModel {
         mMovieListLiveData.setValue(mMovieList);
         // check empty
         empty.set(mMovieList.isEmpty());
+        message.set("EMPTY!");
     }
 
     private void onError(Throwable throwable) throws IOException {

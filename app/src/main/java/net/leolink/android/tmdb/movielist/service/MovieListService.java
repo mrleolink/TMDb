@@ -10,7 +10,11 @@ import io.reactivex.Observable;
  * @author Leo
  */
 public interface MovieListService {
-    /** Get latest movie list **/
+    /** Get latest movie list by release date **/
     @NonNull
     Observable<DiscoverResponse> getMovieList(int page);
+
+    /** Get movie list that are released in a certain year, sorted by release date **/
+    @NonNull
+    Observable<DiscoverResponse> getMovieListByYear(int page, int year);
 }
