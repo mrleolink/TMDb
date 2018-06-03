@@ -2,7 +2,6 @@ package net.leolink.android.tmdb.movielist;
 
 import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,8 +30,6 @@ public class MovieListFragment extends BaseFragment {
     private static final int MAX_YEAR = 2050;
 
     @Inject
-    Context mContext; // application context
-    @Inject
     MovieListViewModelFactory mMovieListViewModelFactory;
 
     private FragmentMovieListBinding mDataBinding;
@@ -58,10 +55,12 @@ public class MovieListFragment extends BaseFragment {
         mDataBinding.recyclerView.setAdapter(mAdapter);
         // observe view model
         mViewModel.getMovieListLiveData().observe(this, mAdapter::setData);
-        mViewModel.getShowToastNextPageLiveData().observe(this, showToast -> {
-            if (showToast) {
-                Toast.makeText(getContext(), R.string.loading_next_page, Toast.LENGTH_SHORT).show();
-                mViewModel.getShowToastNextPageLiveData().setValue(false);
+        mViewModel.getShowToastNextPageLiveData().observe(this, page -> {
+            if (page != null && page > 0) {
+                String message = mResources.getString(R.string.loading_next_page, page);
+                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                // reset
+                mViewModel.getShowToastNextPageLiveData().setValue(0);
             }
         });
         // filter button

@@ -51,7 +51,7 @@ public class MovieListViewModel extends ViewModel {
     private Resources mResources;
     private MovieListService mMovieListService;
 
-    private final MutableLiveData<Boolean> mShowToastNextPageLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Integer> mShowToastNextPageLiveData = new MutableLiveData<>();
     private final MutableLiveData<List<DiscoverMovie>> mMovieListLiveData = new MutableLiveData<>();
     private final List<DiscoverMovie> mMovieList = new ArrayList<>();
 
@@ -77,7 +77,7 @@ public class MovieListViewModel extends ViewModel {
     }
 
     @NonNull
-    public MutableLiveData<Boolean> getShowToastNextPageLiveData() {
+    public MutableLiveData<Integer> getShowToastNextPageLiveData() {
         return mShowToastNextPageLiveData;
     }
 
@@ -98,10 +98,6 @@ public class MovieListViewModel extends ViewModel {
         if (mIsLoading || mAllLoaded) return;
         mIsLoading = true;
         load(false);
-        // loading indicator
-        mShowToastNextPageLiveData.setValue(true);
-        // log
-        Utils.loge("About to load: " + (mCurrentPage + 1));
     }
 
     /** Filter movies by release year **/
@@ -135,16 +131,20 @@ public class MovieListViewModel extends ViewModel {
             empty.set(true);
             message.set(mResources.getString(R.string.loading));
         }
+        // increase page
+        mCurrentPage += 1;
+        // loading indicator
+        mShowToastNextPageLiveData.setValue(mCurrentPage);
+        // log
+        Utils.loge("About to load: " + mCurrentPage);
         // get
-        mDisposable = getMovieListObservable()
+        mDisposable = getMovieListObservable(mCurrentPage)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onSuccess, this::onError);
     }
 
-    private Observable<DiscoverResponse> getMovieListObservable() {
-        // increase page
-        mCurrentPage += 1;
-        if (mYearFilterInt == YEAR_NONE) return mMovieListService.getMovieList(mCurrentPage);
+    private Observable<DiscoverResponse> getMovieListObservable(int pageToLoad) {
+        if (mYearFilterInt == YEAR_NONE) return mMovieListService.getMovieList(pageToLoad);
         return mMovieListService.getMovieListByYear(mCurrentPage, mYearFilterInt);
     }
 
